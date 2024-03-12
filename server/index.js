@@ -4,6 +4,7 @@ import graphql from 'graphql';
 import products from './data.js'
 import cors from 'cors'
 import bodyParser  from 'body-parser'
+import path from 'path';
 import fs from 'fs'
 import db from './db.js'
 var GraphQLSchema = graphql.GraphQLSchema;
@@ -109,5 +110,33 @@ var productType = new GraphQLObjectType({
     res.status(200).json({sucess:true})
 
   });
+
+  app.get('/getalldata' , (req,res) => {
+    const sql = `SELECT name,id, '/files/' || filepic as filepic  FROM information`
+
+    // ดึงข้อมูลจากฐานข้อมูล
+    db.all(sql, [], (err, rows) => {
+        if (err) {
+            return res.status(500).json({ error: err.message });
+        }
+        res.json(rows);
+    });
+
+  })
+
+  app.get ('/files/:filename' , (req,res) => {
+    const filename = req.params.filename;
+    const filePath = path.join(process.cwd(), filename);
+
+    res.sendFile(filePath, (err) => {
+      if (err) {
+          console.error('Error sending file:', err);
+          res.status(err.status).end();
+      } else {
+          console.log('File sent successfully');
+      }
+  });
+
+  })
   app.listen(PORT);
   console.log("Server running on localhost:", PORT);

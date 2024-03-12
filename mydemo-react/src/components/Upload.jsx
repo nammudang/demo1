@@ -1,4 +1,6 @@
 import React, { useRef , useState  } from 'react';
+import { ImageFileResizer  } from 'react-image-file-resizer';
+
 import axios  from 'axios';
 
 function Uploadfile() {
@@ -10,10 +12,49 @@ function Uploadfile() {
     const [filename, setfilename] = useState(null);
     const [error, setError] = useState(null);
 
-   const handChange =(event) => {
-    const file = event.target.files[0];
+
+    
+   const handChange =(event) => { 
     setfilename(file.name)
     convertToBase64(file);
+  };
+
+  const compressImage = (base64String, maxWidth, maxHeight) => {
+    return new Promise((resolve, reject) => {
+      const image = new Image();
+      image.src = base64String;
+
+      image.onload = () => {
+        const canvas = document.createElement('canvas');
+        const context = canvas.getContext('2d');
+
+        const aspectRatio = image.width / image.height;
+        let newWidth = image.width;
+        let newHeight = image.height;
+
+        if (newWidth > maxWidth) {
+          newWidth = maxWidth;
+          newHeight = newWidth / aspectRatio;
+        }
+        if (newHeight > maxHeight) {
+          newHeight = maxHeight;
+          newWidth = newHeight * aspectRatio;
+        }
+
+        canvas.width = newWidth;
+        canvas.height = newHeight;
+
+        context.drawImage(image, 0, 0, newWidth, newHeight);
+
+        const compressedBase64 = canvas.toDataURL('image/jpeg');
+
+        resolve(compressedBase64);
+      };
+
+      image.onerror = (error) => {
+        reject(error);
+      };
+    });
   };
 
   const convertToBase64 = (file) => {
