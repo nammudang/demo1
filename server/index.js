@@ -7,6 +7,7 @@ import bodyParser  from 'body-parser'
 import path from 'path';
 import fs from 'fs'
 import db from './db.js'
+import crypto from 'crypto'
 var GraphQLSchema = graphql.GraphQLSchema;
 var GraphQLObjectType = graphql.GraphQLObjectType;
 var GraphQLString = graphql.GraphQLString;
@@ -17,6 +18,45 @@ app.use(cors());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 var PORT = process.env.port || 3000
+const sk = `-----BEGIN PRIVATE KEY-----
+MIIEvwIBADANBgkqhkiG9w0BAQEFAASCBKkwggSlAgEAAoIBAQDcgN8/+05w23Ra
+PXKUzsm2PbAtHPsTBeAdlqNB9w+8iQQofY6qYcB4N5/ooYY8M/H/ZI4wcqbpmFc+
+IIK/ZCBKHSQKoVV3BJx3ww3FxLAIgUoFOkr+2krZdwH3wd1NjOzN/1HsdYw2qMqp
+z4USnrJ21tcpV1EnCYfWja0NjNriDoCTddlgmniikZo5TAvaWAtrjhxHXXxPpJR5
+XNMNBc8He2ljwtc9IIkJswdkt7Mqq5F4sJawNyE4hXHLTO87logat9/ZicO/JsMy
+AA7K8C7FedflIIQg8TpKBKLdrSzWMb9Pql5lOtpaFMpXmi5FtfGIQOl74NFrXAcy
+/1huPTEdAgMBAAECggEAFMT6wk8Mg2rYWcuh6ExWCZlj58vsBk2uX3sZ45O+4rZR
+MvMopfnRJEGxCTt1pmQKLlEtZ3jVKfmUdiCf0CFBPVnjVDEAGNbRWiKAQJmXLyXm
+b/meqMSs+jDQeaLEEpLslzauY8RqsZdSh44pbaiPDMyNtbIozbGDHv13SGh1EYe5
+YFZY4xArWWRlR06V4ITMqsmf/6VvJauG3T/DC96a7oMLP7Bcn+2BqJ4YqCLxb6c9
+nes0wr3UpvdnyM0HRf+4vWrp7eOwdMIpyaWXVkhZk9zd+UL7YTOzxBiSiPy4lRkA
+M8/VtL7B0fHZXahtjDIOx0fBkcwtrRXhtTa11GV6gQKBgQD2vvrAZgawsqhDY8rs
+f5+fafAL0L8DYIpL4QUbiH28mzH4+LuvySLOzPRiOzKTba0zSQyxF7n1sxpiJ9MM
+csc2rU7ZrnJK5z6Np+E9qFpc66NgmcaTP7PJdWsT6+8mosm2JJzKc9huSf/7PPz5
+h5KcSB0vreJslVAK/gUSvEVq4QKBgQDkxe+fHsdvycTRJOKnimJHcjLpjWj7xTsG
+AIh5c3XAA/JxbKlVeUtA+J4+uCe1LLrM8sSsE+HDGxWZj/N5vMiRs5fpz3Tu5H0R
+LWrK1jVydYBL09V/aGPtVaSwGQvM0ASTe0GaOPGuQ0UmtgOhdCD4YhUChY3yUu8h
+RyqASgdpvQKBgQC8NjUC6VAVHFHpBYfWGgtiB+bIvHPXWZ5j/sJsnBJ8+UyHAwP3
+NE9Ou1t2Sn1ro29H/WKm+tgoKHPph0Me7bYzaMMKnFwl8nnuh63x4Cb9VeiLWQD1
+dNPoyZ3h1kfXirieLRNEAlWG2v9dXsoAdH9Kol9Q7SwXc1VY7SZlgiLZQQKBgQDE
+gTSLRB/g6LnzP7CkYpx6bCBJNpsXr9k8FZckY0WgUoOcY86ryY0XWLZsfzg0SiCG
+TH0cpdNFCG2sQtbLGZpadJ4nSnhRftfiulVBt2+fSkiSWXnIf31d7jOQw2K8YW2c
+1MGL3B/UJJowXyWNODfdwjnzuY4suIoI1p0uJuhpLQKBgQDjvgZ4Sx6NA6jSkTfd
+qUvxt2IuNp3KqJtah0t4Gqq5RFpkWIAa57qm4qnFQE6RvleQy154KFGzP9HmzhEL
+HQ5W39CboJP3zyNhpGPKBdxI6jev+B4t13X5EJowCQkwn4tmawDahbHtbYSaqjW1
+VOyqrHQjxl3XAT92J9qodN21fw==
+-----END PRIVATE KEY-----`
+
+const pk = `-----BEGIN PUBLIC KEY-----
+MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA3IDfP/tOcNt0Wj1ylM7J
+tj2wLRz7EwXgHZajQfcPvIkEKH2OqmHAeDef6KGGPDPx/2SOMHKm6ZhXPiCCv2Qg
+Sh0kCqFVdwScd8MNxcSwCIFKBTpK/tpK2XcB98HdTYzszf9R7HWMNqjKqc+FEp6y
+dtbXKVdRJwmH1o2tDYza4g6Ak3XZYJp4opGaOUwL2lgLa44cR118T6SUeVzTDQXP
+B3tpY8LXPSCJCbMHZLezKquReLCWsDchOIVxy0zvO5aIGrff2YnDvybDMgAOyvAu
+xXnX5SCEIPE6SgSi3a0s1jG/T6peZTraWhTKV5ouRbXxiEDpe+DRa1wHMv9Ybj0x
+HQIDAQAB
+-----END PUBLIC KEY-----
+`
 var voteType = new GraphQLObjectType({
     name: "vote",
     description: "vote of The product",
@@ -138,5 +178,34 @@ var productType = new GraphQLObjectType({
   });
 
   })
+
+  app.post('/getdatadetail' , (req,res) => {
+    const sql = `SELECT name,id, '/files/' || filepic as filepic  FROM information where id = ${req.body.id}`
+    db.all(sql, [], (err, rows) => {
+        if (err) {
+            return res.status(500).json({ error: err.message });
+        }
+        res.json(rows);
+    });
+  })
+  app.post('/update' , (req,res) => {
+    const sql = `UPDATE information  SET name = '${req.body.name}'  where id = ${req.body.id}`
+    db.all(sql, [], (err, rows) => {
+        if (err) {
+            return res.status(500).json({ error: err.message });
+        }
+        res.json(rows);
+    });
+  })
+
+  app.get('/profie' , (req,res) => {
+    const data = {
+      phone : crypto.privateEncrypt(sk, Buffer.from('0922790646', 'utf-8')).toString('base64')
+    }
+    console.log(data.phone.length)
+    res.send(data)
+  })
+
+
   app.listen(PORT);
   console.log("Server running on localhost:", PORT);

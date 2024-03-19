@@ -3,12 +3,13 @@ import Card from './components/card'
 import Card2 from './components/Card2'
 import './App.css'
 import Uploadfile from './components/Upload'
+import Showdata from './components/showData'
 function App() {
   const [count, setCount] = useState(0)
 
   return (
     <>
-      <Card/>
+    <Showdata/>
       <Card2/>
       <Uploadfile />
     </>
